@@ -180,9 +180,11 @@ el resultado debe ser parecido al siguiente:
 
 ```
  PASS  tests/api.test.js
-  √ test for adding a new planet (527 ms)
+  √ test for getting planets from swapi and transforming properties to spanish (866 ms)
 
 Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Snapshots:   0 total
+Time:        1.329 s, estimated 2 s
+Ran all test suites.
 ```
