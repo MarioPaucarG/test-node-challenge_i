@@ -1,0 +1,60 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: personalmario
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: test-node
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:CreateTable
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [PlanetasTable, Arn]
+
+functions:
+  getPlanetsSwapi:
+    handler: src/Controller/getSwapiPlanets.handler
+    events:
+      - httpApi:
+          path: /planetas/swapi
+          method: get
+  getPlanetsList:
+    handler: src/Controller/getPlanetsList.handler
+    events:
+      - httpApi:
+          path: /planetas
+          method: get
+  postPlanets:
+    handler: src/Controller/addPlanet.handler
+    events:
+      - httpApi:
+          path: /planetas
+          method: post
+
+resources:
+  Resources:
+    PlanetasTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: planetaId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: planetaId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: PlanetasTable
+
+plugins:
+  - serverless-offline
