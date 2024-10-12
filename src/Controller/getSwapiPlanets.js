@@ -7,7 +7,7 @@ const handler = async (_) => {
     console.log("Status Code:", res.status);
     const planets = [];
     const swapiData = await res.json();
-    console.log(swapiData);
+
     swapiData.results.forEach((planet) => {
       const planetSwapiModel = new PlanetSwapiModel(planet);
       planets.push(planetSwapiModel);

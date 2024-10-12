@@ -1,90 +1,188 @@
-<!--
-title: 'Serverless Framework Node Express API service backed by DynamoDB on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Node Express API service backed by DynamoDB running on AWS Lambda using the Serverless Framework.'
-layout: Doc
-framework: v4
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, Inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# API para obtener y agregar planetas del API SWAPI
 
-# Serverless Framework Node Express API on AWS
+El API fue hecho como un reto simple, utiliza Node.js, DynamoDB, Serverless y Jest; contiene 3 endpoints, cabe resaltar que se necesita serverless con credenciales necesarias para despliegue en AWS.
 
-This template demonstrates how to develop and deploy a simple Node Express API service, backed by DynamoDB table, running on AWS Lambda using the Serverless Framework.
+## Uso
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests using the `httpApi` event. To learn more about `httpApi` event configuration options, please refer to [httpApi event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). As the event is configured in a way to accept all incoming requests, the Express.js framework is responsible for routing and handling requests internally. This implementation uses the `serverless-http` package to transform the incoming event request payloads to payloads compatible with Express.js. To learn more about `serverless-http`, please refer to the [serverless-http README](https://github.com/dougmoscrop/serverless-http).
+### Obtener planetas desde Swappi
 
-Additionally, it also handles provisioning of a DynamoDB database that is used for storing data about users. The Express.js application exposes two endpoints, `POST /users` and `GET /user/:userId`, which create and retrieve a user record.
-
-## Usage
-
-### Deployment
-
-Install dependencies with:
+endpoint de método GET para obtener los planetas desde SWAPI con los campos en español:
 
 ```
-npm install
+/planetas/swapi
 ```
 
-and then deploy with:
+los datos fueron almacenados en una clase y el resultado deberia ser similar a este:
 
 ```
-serverless deploy
+{
+    "status": 200,
+    "data": [
+        {
+            "diametro": "10465",
+            "clima": "arid",
+            "agua_superficial": "1",
+            "nombre": "Tatooine",
+            "creado": "2014-12-09T13:50:49.641000Z",
+            "url": "https://swapi.py4e.com/api/planets/1/",
+            "periodo_rotacion": "23",
+            "editado": "2014-12-20T20:58:18.411000Z",
+            "terreno": "desert",
+            "gravedad": "1 standard",
+            "periodo_orbital": "304",
+            "peliculas": [
+                "https://swapi.py4e.com/api/films/1/",
+                "https://swapi.py4e.com/api/films/3/",
+                "https://swapi.py4e.com/api/films/4/",
+                "https://swapi.py4e.com/api/films/5/",
+                "https://swapi.py4e.com/api/films/6/"
+            ],
+            "residentes": [
+                "https://swapi.py4e.com/api/people/1/",
+                "https://swapi.py4e.com/api/people/2/",
+                "https://swapi.py4e.com/api/people/4/",
+                "https://swapi.py4e.com/api/people/6/",
+                "https://swapi.py4e.com/api/people/7/",
+                "https://swapi.py4e.com/api/people/8/",
+                "https://swapi.py4e.com/api/people/9/",
+                "https://swapi.py4e.com/api/people/11/",
+                "https://swapi.py4e.com/api/people/43/",
+                "https://swapi.py4e.com/api/people/62/"
+            ],
+            "poblacion": "200000"
+        }
+    ],
+    "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    }
 ```
 
-After running deploy, you should see output similar to:
+### Agregar planeta a la DB de DynamoDB
+
+Endpoint de método POST encargado de almacenar un planeta en la base de datos, se utilizó un ORM llamado dynamoose:
+```
+/planetas
+```
+La estructura de los datos que se deben enviar es la misma de un planeta traido con el api anterior en formato JSON, ejemplo:
 
 ```
-Deploying "aws-node-express-dynamodb-api" to stage "dev" (us-east-1)
-
-✔ Service deployed to stack aws-node-express-dynamodb-api-dev (109s)
-
-endpoint: ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
-functions:
-  api: aws-node-express-dynamodb-api-dev-api (3.8 MB)
+{
+            "diametro": "10465",
+            "clima": "arid",
+            "agua_superficial": "1",
+            "nombre": "Tatooine",
+            "creado": "2014-12-09T13:50:49.641000Z",
+            "url": "https://swapi.py4e.com/api/planets/1/",
+            "periodo_rotacion": "23",
+            "editado": "2014-12-20T20:58:18.411000Z",
+            "terreno": "desert",
+            "gravedad": "1 standard",
+            "periodo_orbital": "304",
+            "peliculas": [
+                "https://swapi.py4e.com/api/films/1/",
+                "https://swapi.py4e.com/api/films/3/",
+                "https://swapi.py4e.com/api/films/4/",
+                "https://swapi.py4e.com/api/films/5/",
+                "https://swapi.py4e.com/api/films/6/"
+            ],
+            "residentes": [
+                "https://swapi.py4e.com/api/people/1/",
+                "https://swapi.py4e.com/api/people/2/",
+                "https://swapi.py4e.com/api/people/4/",
+                "https://swapi.py4e.com/api/people/6/",
+                "https://swapi.py4e.com/api/people/7/",
+                "https://swapi.py4e.com/api/people/8/",
+                "https://swapi.py4e.com/api/people/9/",
+                "https://swapi.py4e.com/api/people/11/",
+                "https://swapi.py4e.com/api/people/43/",
+                "https://swapi.py4e.com/api/people/62/"
+            ],
+            "poblacion": "200000"
+        }
 ```
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [`httpApi` event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). Additionally, in current configuration, the DynamoDB table will be removed when running `serverless remove`. To retain the DynamoDB table even after removal of the stack, add `DeletionPolicy: Retain` to its resource definition.
-
-### Invocation
-
-After successful deployment, you can create a new user by calling the corresponding endpoint:
+La respuesta debe ser parecida a esta:
 
 ```
-curl --request POST 'https://xxxxxx.execute-api.us-east-1.amazonaws.com/users' --header 'Content-Type: application/json' --data-raw '{"name": "John", "userId": "someUserId"}'
+{
+    "code": 200,
+    "description_status": "Operación exitosa",
+    "message": "Planeta agregado correctamente"
+}
 ```
 
-Which should result in the following response:
+### Obtener planetas desde DB
 
-```json
-{ "userId": "someUserId", "name": "John" }
-```
-
-You can later retrieve the user by `userId` by calling the following endpoint:
+Endpoint de método GET, encargado de obtener el listado de planetas que se grabaron en la base de datos con el método POST anterior.
 
 ```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/users/someUserId
+/planetas
 ```
 
-Which should result in the following response:
-
-```json
-{ "userId": "someUserId", "name": "John" }
-```
-
-### Local development
-
-The easiest way to develop and test your function is to use the `dev` command:
+La respuesta debe ser parecida a esta
 
 ```
-serverless dev
+{
+    "status": 200,
+    "data": [
+        {
+            "diametro": "10465",
+            "nombre": "Tatooine",
+            "agua_superficial": "1",
+            "clima": "arid",
+            "residentes": [
+                "https://swapi.py4e.com/api/people/1/",
+                "https://swapi.py4e.com/api/people/2/",
+                "https://swapi.py4e.com/api/people/4/",
+                "https://swapi.py4e.com/api/people/6/",
+                "https://swapi.py4e.com/api/people/7/",
+                "https://swapi.py4e.com/api/people/8/",
+                "https://swapi.py4e.com/api/people/9/",
+                "https://swapi.py4e.com/api/people/11/",
+                "https://swapi.py4e.com/api/people/43/",
+                "https://swapi.py4e.com/api/people/62/"
+            ],
+            "planetaId": "57780699-86ee-492d-964b-e258e49bb0fc",
+            "url": "https://swapi.py4e.com/api/planets/1/",
+            "poblacion": "200000",
+            "periodo_orbital": "304",
+            "peliculas": [
+                "https://swapi.py4e.com/api/films/1/",
+                "https://swapi.py4e.com/api/films/3/",
+                "https://swapi.py4e.com/api/films/4/",
+                "https://swapi.py4e.com/api/films/5/",
+                "https://swapi.py4e.com/api/films/6/"
+            ],
+            "editado": "2014-12-20T20:58:18.411000Z",
+            "periodo_rotacion": "23",
+            "gravedad": "1 standard",
+            "creado": "2014-12-09T13:50:49.641000Z",
+            "terreno": "desert"
+        }
+    ],
+    "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    }
+}
 ```
 
-This will start a local emulator of AWS Lambda and tunnel your requests to and from AWS Lambda, allowing you to interact with your function as if it were running in the cloud.
+### Prueba unitaria con JEST
 
-Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
+Una prueba sencilla para mostrar una prueba unitaria con JEST, se ejecuta con el siguiente comando una vez instalado los paquetes de node:
 
-When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
+```
+npm test
+```
+
+el resultado debe ser parecido al siguiente:
+
+```
+ PASS  tests/api.test.js
+  √ test for adding a new planet (527 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+```
